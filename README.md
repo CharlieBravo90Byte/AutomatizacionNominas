@@ -23,7 +23,8 @@ Incluye una interfaz **por consola**, así que puedes ejecutarlo en cualquier PC
 1. `java -jar nominas-1.0.jar`
 ## Opción 2: Ejecutar BAT (recomendado)
 1. Archivo con script para ejecutar programa de forma directa.
-   
+2. Considerar que debe estar el programa nominas-1.0.jar misma carpeta que el archivo.
+3. El JAR lo puedes obtener de la carpeta target del proyecto.
 
 ## Estructura de archivos:
 - Archivo de entrada: `input/empleados.csv`
