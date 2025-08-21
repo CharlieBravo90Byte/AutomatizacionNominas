@@ -22,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import cl.proyecto.desafio.nominas.model.Empleado;
 import cl.proyecto.desafio.nominas.util.NominasUtil;
+import java.time.format.DateTimeFormatter;
 
 
 
@@ -73,42 +74,56 @@ public class NominaService {
      * 
      */
     private void leerArchivo() {
-        try (BufferedReader br = new BufferedReader(new FileReader(INPUT_PATH))) {
-            String linea;
-            boolean primeraLinea = true;
-            while ((linea = br.readLine()) != null) {
-                if (primeraLinea) { primeraLinea = false; continue; }
-                String[] datos = linea.split(",");
-                if (datos.length != 8) {
-                    empleadosInvalidos.add(new Empleado("", "", "", "", 0, 0, 0, null, "Cantidad de columnas incorrecta"));
-                    continue;
-                }
-                String nombre = datos[0], apellido = datos[1], rut = datos[2], cargo = datos[3];
-                int salarioBase, bonos, descuentos;
-                String fechaIngresoStr = datos[7];
-                try {
-                    salarioBase = Integer.parseInt(datos[4]);
-                    bonos = Integer.parseInt(datos[5]);
-                    descuentos = Integer.parseInt(datos[6]);
-                } catch (NumberFormatException e) {
-                    empleadosInvalidos.add(new Empleado(nombre, apellido, rut, cargo, 0, 0, 0, null, "Error de formato en salario, bonos o descuentos"));
-                    continue;
-                }
-                String motivoError = NominasUtil.validarEmpleado(rut, salarioBase, bonos, descuentos, fechaIngresoStr, ruts);
-                if (motivoError == null) {
-                    LocalDate fechaIngreso = LocalDate.parse(fechaIngresoStr, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-                    ruts.add(rut);
-                    Empleado empleado = new Empleado(nombre, apellido, rut, cargo, salarioBase, bonos, descuentos, fechaIngreso);
-                    calcularAntiguedadYSalarioFinal(empleado);
-                    empleadosValidos.add(empleado);
-                } else {
-                    empleadosInvalidos.add(new Empleado(nombre, apellido, rut, cargo, salarioBase, bonos, descuentos, null, motivoError));
-                }
+    try (BufferedReader br = new BufferedReader(new FileReader(INPUT_PATH))) {
+        String linea;
+        boolean primeraLinea = true;
+        String separador = null;
+        
+        while ((linea = br.readLine()) != null) {
+            if (primeraLinea) { 
+                separador = detectarSeparador(linea);
+                System.out.println("Separador: " + (separador.equals(",") ? "coma (,)" : "punto y coma (;)"));
+                primeraLinea = false; 
+                continue; 
             }
-        } catch (IOException e) {
-            empleadosInvalidos.add(new Empleado("", "", "", "", 0, 0, 0, null, "Error al leer el archivo de entrada: " + e.getMessage()));
+            
+            String[] datos = linea.split(separador);
+            if (datos.length != 8) {
+                empleadosInvalidos.add(new Empleado("", "", "", "", 0, 0, 0, null, "Cantidad de columnas incorrecta"));
+                continue;
+            }
+            
+            String nombre = datos[0].trim();
+            String apellido = datos[1].trim();
+            String rut = datos[2].trim();
+            String cargo = datos[3].trim();
+            String fechaIngresoStr = datos[7].trim();
+            
+            int salarioBase, bonos, descuentos;
+            
+            try {
+                salarioBase = Integer.parseInt(datos[4].trim());
+                bonos = Integer.parseInt(datos[5].trim());
+                descuentos = Integer.parseInt(datos[6].trim());
+            } catch (NumberFormatException e) {
+                empleadosInvalidos.add(new Empleado(nombre, apellido, rut, cargo, 0, 0, 0, null, "Error de formato en salario, bonos o descuentos"));
+                continue;
+            }
+            String motivoError = NominasUtil.validarEmpleado(rut, salarioBase, bonos, descuentos, fechaIngresoStr, ruts);
+            if (motivoError == null) {
+                LocalDate fechaIngreso = LocalDate.parse(fechaIngresoStr, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                ruts.add(rut);
+                Empleado empleado = new Empleado(nombre, apellido, rut, cargo, salarioBase, bonos, descuentos, fechaIngreso);
+                calcularAntiguedadYSalarioFinal(empleado);
+                empleadosValidos.add(empleado);
+            } else {
+                empleadosInvalidos.add(new Empleado(nombre, apellido, rut, cargo, salarioBase, bonos, descuentos, null, motivoError));
+            }
         }
+    } catch (IOException e) {
+        empleadosInvalidos.add(new Empleado("", "", "", "", 0, 0, 0, null, "Error al leer el archivo de entrada: " + e.getMessage()));
     }
+}
 
     /**
      * Calcula la antigüedad del empleado y su salario final.
@@ -125,6 +140,7 @@ public class NominaService {
         int salarioFinal = empleado.getSalarioBase() + empleado.getBonos() + bonificacion - empleado.getDescuentos();
         empleado.setSalarioFinal(salarioFinal);
     }
+    
     /**
      * Escribe los archivos de salida con los empleados válidos e inválidos.
      * 
@@ -152,6 +168,51 @@ public class NominaService {
             
         }
     }
+    
+    /**
+ * Cuenta las ocurrencias de un carácter en una cadena.
+ * 
+ * @param cadena cadena donde buscar
+ * @param caracter carácter a contar
+ * @return número de ocurrencias
+ */
+private int contarOcurrencias(String cadena, char caracter) {
+    int contador = 0;
+    for (int i = 0; i < cadena.length(); i++) {
+        if (cadena.charAt(i) == caracter) {
+            contador++;
+        }
+    }
+    return contador;
+}
+    
+    /**
+ * Detecta automáticamente el separador utilizado en el archivo CSV.
+ * Analiza la primera línea y determina si usa comas o punto y coma.
+ * 
+ * @param primeraLinea línea de encabezados del archivo CSV
+ * @return separador detectado ("," o ";")
+ */
+private String detectarSeparador(String primeraLinea) {
+    // Contar ocurrencias de cada separador
+    int cantidadComas = contarOcurrencias(primeraLinea, ',');
+    int cantidadPuntoYComa = contarOcurrencias(primeraLinea, ';');
+    
+    // El separador correcto debería generar exactamente 7 separaciones (8 columnas)
+    if (cantidadComas == 7) {
+        return ",";
+    } else if (cantidadPuntoYComa == 7) {
+        return ";";
+    }
+    
+    // Si no hay exactamente 7, usar el que tenga más ocurrencias
+    if (cantidadPuntoYComa > cantidadComas) {
+        return ";";
+    } else {
+        return ",";
+    }
+}
+    
 
     /**
      * Genera un resumen estadístico del procesamiento de la nómina.
