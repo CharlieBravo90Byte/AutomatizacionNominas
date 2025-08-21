@@ -16,6 +16,7 @@ Incluye una interfaz **por consola**, así que puedes ejecutarlo en cualquier PC
   - Empleados válidos: `src/main/resources/output/empleados_validos.csv`
   - Empleados inválidos: `src/main/resources/output/empleados_invalidos.csv`
 - Muestra un resumen por consola: cantidad de empleados, promedio de salarios, etc.
+- Importante que el archivo este en delimitador son las comas (;).
 
 ---
 
@@ -23,7 +24,7 @@ Incluye una interfaz **por consola**, así que puedes ejecutarlo en cualquier PC
 
 1. **Clona el repositorio**
    ```bash
-   git clone <url-del-repo>
+   git clone https://github.com/CharlieBravo90Byte/AutomatizacionNominas.git
    cd desafio-nominas
    ```
 
@@ -38,7 +39,7 @@ Incluye una interfaz **por consola**, así que puedes ejecutarlo en cualquier PC
    - El formato esperado es:  
      ```
      Nombre;Apellido;RUT;Cargo;SalarioBase;Bonos;Descuentos;FechaIngreso
-     Juan;Pérez;12345678-9;Desarrollador;800000;100000;50000;2018-03-20
+     Maria;Muñoz;12345678-9;QA;800000;100000;50000;2018-03-20
      ```
 
 5. **Compila y ejecuta**
