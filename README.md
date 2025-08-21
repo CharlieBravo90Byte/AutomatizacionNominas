@@ -16,11 +16,21 @@ Incluye una interfaz **por consola**, así que puedes ejecutarlo en cualquier PC
   - Empleados válidos: `src/main/resources/output/empleados_validos.csv`
   - Empleados inválidos: `src/main/resources/output/empleados_invalidos.csv`
 - Muestra un resumen por consola: cantidad de empleados, promedio de salarios, etc.
-- Importante que el archivo este en delimitador son las comas (;).
+- El formato se le agrega validacion si es separador por coma (,) o punto y coma (;).
 
 ---
+## Opción 1: Ejecutar JAR
+1. `java -jar nominas-1.0.jar`
+## Opción 2: Ejecutar BAT (recomendado)
+1. Archivo con script para ejecutar programa de forma directa.
+   
 
-## Instalación y ejecución
+## Estructura de archivos:
+- Archivo de entrada: `input/empleados.csv`
+- Archivos de salida: `output/`
+
+
+## Instalación y ejecución version codigo
 
 1. **Clona el repositorio**
    ```bash
@@ -78,7 +88,6 @@ src/main/java/cl/proyecto/desafio/nominas/
     service/NominaService.java
     model/Empleado.java
     util/NominasUtil.java
-    view/Pantalla.java (solo si quieres interfaz gráfica)
 src/main/resources/input/empleados.csv
 src/main/resources/output/empleados_validos.csv
 src/main/resources/output/empleados_invalidos.csv
