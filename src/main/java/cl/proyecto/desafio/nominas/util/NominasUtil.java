@@ -10,10 +10,25 @@ import java.time.format.DateTimeParseException;
 import java.util.Set;
 
 /**
- *
+ * Clase utilitaria para validaciones relacionadas con el procesamiento de nóminas.
+ * 
  * @author cabra
+ * @version 1.0
+ * @since 2025-08-21
  */
 public class NominasUtil {
+    
+    /**
+     * Valida todos los datos de un empleado según las reglas de negocio establecidas.
+     * 
+     * @param rut el RUT del empleado a validar
+     * @param salarioBase el salario base en pesos chilenos
+     * @param bonos los bonos adicionales en pesos chilenos
+     * @param descuentos los descuentos aplicados en pesos chilenos
+     * @param fechaIngresoStr la fecha de ingreso en formato String (yyyy-MM-dd)
+     * @param ruts conjunto de RUTs ya procesados para verificar duplicados
+     * @return null si todas las validaciones pasan, o un mensaje de error específico si alguna falla
+     */
     public static String validarEmpleado(String rut, int salarioBase, int bonos, int descuentos, String fechaIngresoStr, Set<String> ruts) {
         if (ruts.contains(rut))
             return "RUT duplicado";

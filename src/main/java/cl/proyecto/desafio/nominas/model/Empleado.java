@@ -7,8 +7,10 @@ package cl.proyecto.desafio.nominas.model;
 import java.time.LocalDate;
 
 /**
- *
+ * Entidad que representa un empleado en el sistema de nómina.
  * @author cabra
+ * @version 1.0
+ * @since 2025-08-21
  */
 public class Empleado {
     
@@ -25,6 +27,7 @@ public class Empleado {
     private int salarioFinal;
     private String motivoError;
 
+    
     public Empleado() {
     }
 

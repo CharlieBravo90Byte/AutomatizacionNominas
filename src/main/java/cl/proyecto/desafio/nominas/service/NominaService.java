@@ -13,33 +13,53 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.Period;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.stereotype.Service;
+
 import cl.proyecto.desafio.nominas.model.Empleado;
 import cl.proyecto.desafio.nominas.util.NominasUtil;
-import org.springframework.stereotype.Service;
 
 
 
 /**
- *
+ * Servicio encargado del procesamiento de nóminas de empleados.
+ * 
+ * Esta clase utiliza validaciones para RUT, rangos salariales y formatos de fecha,
+ * además de calcular automáticamente la antigüedad y bonificaciones correspondientes.
+ * 
  * @author cabra
+ * @version 1.0
+ * @since 2025-08-21
  */
 @Service
 public class NominaService {
+    
+    /** Ruta del archivo de entrada con los datos de empleados */
     private static final String INPUT_PATH = "src/main/resources/input/empleados.csv";
+    
+    /** Ruta del archivo de salida para empleados válidos */
     private static final String OUTPUT_VALIDOS = "src/main/resources/output/empleados_validos.csv";
+    
+    /** Ruta del archivo de salida para empleados inválidos */
     private static final String OUTPUT_INVALIDOS = "src/main/resources/output/empleados_invalidos.csv";
 
+    /** Lista de empleados que pasaron todas las validaciones */
     private List<Empleado> empleadosValidos = new ArrayList<>();
+    
+    /** Lista de empleados que no pasaron las validaciones */
     private List<Empleado> empleadosInvalidos = new ArrayList<>();
+    
+    /** Conjunto de RUTs ya procesados para evitar duplicados */
     private Set<String> ruts = new HashSet<>();
 
+    /**
+     * Método principal que procesa la nómina completa.
+     * 
+     */
     public void procesarNomina() {
         empleadosValidos.clear();
         empleadosInvalidos.clear();
@@ -48,6 +68,10 @@ public class NominaService {
         escribirArchivosSalida();
     }
 
+    /**
+     * Lee y procesa el archivo CSV de entrada línea por línea.
+     * 
+     */
     private void leerArchivo() {
         try (BufferedReader br = new BufferedReader(new FileReader(INPUT_PATH))) {
             String linea;
@@ -71,9 +95,8 @@ public class NominaService {
                     continue;
                 }
                 String motivoError = NominasUtil.validarEmpleado(rut, salarioBase, bonos, descuentos, fechaIngresoStr, ruts);
-                LocalDate fechaIngreso = null;
                 if (motivoError == null) {
-                    fechaIngreso = LocalDate.parse(fechaIngresoStr, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+                    LocalDate fechaIngreso = LocalDate.parse(fechaIngresoStr, java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd"));
                     ruts.add(rut);
                     Empleado empleado = new Empleado(nombre, apellido, rut, cargo, salarioBase, bonos, descuentos, fechaIngreso);
                     calcularAntiguedadYSalarioFinal(empleado);
@@ -87,6 +110,11 @@ public class NominaService {
         }
     }
 
+    /**
+     * Calcula la antigüedad del empleado y su salario final.
+     * 
+     * @param empleado el empleado al cual calcular la antigüedad y salario final
+     */
     private void calcularAntiguedadYSalarioFinal(Empleado empleado) {
         int años = Period.between(empleado.getFechaIngreso(), LocalDate.now()).getYears();
         empleado.setAntiguedad(años);
@@ -98,6 +126,7 @@ public class NominaService {
         empleado.setSalarioFinal(salarioFinal);
     }
     /**
+     * Escribe los archivos de salida con los empleados válidos e inválidos.
      * 
      */
     private void escribirArchivosSalida() {
@@ -120,9 +149,15 @@ public class NominaService {
                 }
             }
         } catch (IOException e) {
+            
         }
     }
 
+    /**
+     * Genera un resumen estadístico del procesamiento de la nómina.
+     * 
+     * @return una cadena de texto formateada con el resumen completo del procesamiento
+     */
     public String obtenerResumen() {
         int totalValidos = empleadosValidos.size();
         int totalInvalidos = empleadosInvalidos.size();
